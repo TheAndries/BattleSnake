@@ -27,6 +27,9 @@ body = [Point(1,3), Point(2,3), Point(3,3)]
 TailPoint = Snake(1,name,3,body,5,6,7,8,9)
 print(TailPoint)
 
+#So we want to prevent the snake from moving into walls. It is a matrix of 11x11.
+#Meaning we should have it determine moves as unsafe if:
+#Head coordinates + move = NewCoordinates [(-1,0:11), (0:11,-1), (12, 0:11), (0:11, 12)]
 
 
 

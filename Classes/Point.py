@@ -17,12 +17,29 @@ class Point:
     def CalcDistance(self, x, y):
         coordinates = (self.x - x) + (self.y - y)
         return coordinates
+    
+    #Define out of bounds
+    def OutOfBounds(self, x, y):
+        if x < 0:
+            print('Dont move here')
+        if x > 11:
+            print('Dont move here')
+        else:
+            return print('All good on this side') 
+        if y < 0:
+            print('Dont move here')
+        if y > 11:
+            print('Dont move here')
+        else:
+            return print('All good on this side') 
 
-SnakePoint = Point(2,4)
+#OutOfBounds = Point([(-1,0:11), (0:11,-1), (12, 0:11), (0:11, 12)])
 
+SnakePoint = Point(12,4)
+Try = Point(0,0)
 
 print(SnakePoint)
-print(SnakePoint.CalcDistance(8,8))
+print(Try.OutOfBounds(12, 4))
 
 
 ## Need to be able to substract, divide, multiply
@@ -32,13 +49,13 @@ print(SnakePoint.CalcDistance(8,8))
 ## if we are 4 and make circles we will still survive because every square in a 2x2 will be occupied.
 
 ## Starting length so always 3 + x
-length = 3
+#length = 3
 
 ## Starting coordinates always 0,0 
-Head = [0,0]
+#Head = [0,0]
 
 ## starting health always 100 
-Health = 100 
+#Health = 100 
 
 ## Health per turn = health - 1 
-NewHealth = Health - 1 
+#NewHealth = Health - 1 
