@@ -12,6 +12,7 @@
 
 import random
 import typing
+from scipy import spatial
 
 # info is called when you create your Battlesnake on play.battlesnake.com
 # and controls your Battlesnake's appearance
@@ -22,8 +23,8 @@ def info() -> typing.Dict:
     return {
         "apiversion": "1",
         "author": "CAsnake",  # TODO: Your Battlesnake Username
-        "color": "#888888",  # TODO: Choose color
-        "head": "default",  # TODO: Choose head
+        "color": "#0000FF",  # TODO: Choose color
+        "head": "#FFFF00",  # TODO: Choose head
         "tail": "default",  # TODO: Choose tail
     }
 
@@ -37,10 +38,12 @@ def end(game_state: typing.Dict):
 # Valid moves are "up", "down", "left", or "right"
 # See https://docs.battlesnake.com/api/example-move for available data
 def move(game_state: typing.Dict) -> typing.Dict:
-    my_head = game_state["you"]["body"][0]  # Coordinates of your head
-    my_body = game_state["you"]["body"][1, :]
-    board_height = game_state["board"]["height"]
-    board_width = game_state["board"]["width"]
+    my_head = game_state['you']['body'][0]  # Coordinates of your head. grabs first row of body
+    my_body = game_state['you']['body'][1, :] # grabs head + all of body
+    board_height = game_state['board']['height']
+    board_width = game_state['board']['width']
+    snakes = game_state['board']['snakes']
+    foods = game_state['board']['food']
         
     possible_moves = { 
         "up": {
@@ -62,25 +65,46 @@ def move(game_state: typing.Dict) -> typing.Dict:
     }
     possible_moves = avoid_my_body(my_body, possible_moves)
     possible_moves = avoid_walls(board_width, board_height, possible_moves)
+    possible_moves = avoid_snake(snakes, possible_moves)
     
-    print_all(game_state, my_head, my_body)
+    target = get_target_close(foods, my_head)
 
-    possible_moves = list(possible_moves.keys())
+    #print_all(game_state, my_head, my_body) -- this is not printing
+
     if len(possible_moves) > 0:
-        return random.choice(possible_moves)
+        if target is not None:
+            move = move_target(possible_moves, my_head, target)
+        else:
+            possible_moves = list(possible_moves.keys())
+            move = random.choice(possible_moves)
     else:  
-        print("GOINT TO LOSE!!!")
-        return "Up"
-
+        move = "up"
+        print('We are going to lose!!')
     
-def print_all(game_state, my_head, my_body):
-    print(f"~~~ Turn: {game_state['Turn']}) Game Mode: {game_state['game']['ruleset']['name']} ~~~")
+    print(f"{game_state['game']['id']} MOVE {game_state['turn']}: {move} picked from all valid options in {possible_moves}")
+    return {"move": move}
+    
+def print_all(game_state, my_head, my_body): # unused code, do we need it?
+    print(f"~~~ Turn: {game_state['turn']}) Game Mode: {game_state['game']['ruleset']['name']} ~~~")
     print(f"All board game_state this turn: {game_state}")
     print(f"My battlesnakes head this turn is: {my_head}")
     print(f"My battlesnakes head this turn is: {my_body}")
 
-def avoid_my_body(my_body, possible_moves):
+def avoid_snake(snakes, possible_moves):
+    remove = []
 
+    for snake in snakes:
+        for direction, location in possible_moves.items():
+            if location in snake["body"]:
+                remove.append(direction)
+
+    remove = set(remove)            #removes duplicates
+    for direction in remove:
+        del possible_moves[direction]
+
+    return possible_moves
+
+def avoid_my_body(my_body, possible_moves):
     remove = []
 
     for direction, location in possible_moves.items(): 
@@ -95,7 +119,7 @@ def avoid_my_body(my_body, possible_moves):
 def avoid_walls(board_width, board_height, possible_moves):
     remove = []
 
-    for direction, location in possible_moves.item():
+    for direction, location in possible_moves.items():
         x_out_range = (location["x"] < 0 or location["x"] == board_width)
         y_out_range = (location["y"] < 0 or location["y"] == board_height)
 
@@ -107,36 +131,37 @@ def avoid_walls(board_width, board_height, possible_moves):
 
     return possible_moves
 
+def get_target_close(foods, my_head):
+    coordinates = []
+
+    if len(foods) == 0:
+        return None
+    
+    for food in foods:
+        coordinates.append( (food["x"], food["y"]) )
+
+    tree = spatial.KDTree(coordinates)
+
+    results = tree.query([(my_head["x"], my_head["y"])])[1]
+
+    return foods[results[0]] #gives us closest food 
+
+def move_target(possible_moves, my_head, target):
+    distance_x = abs(my_head["x"] - target["x"]) #absolute because we want a positive
+    distance_y = abs(my_head["y"] - target["y"])
+
+    for direction, location in possible_moves.items():
+        new_distance_x = abs( location["x"] - target["x"])
+        new_distance_y = abs( location["y"] - target["y"])
+
+        if new_distance_x < distance_x or new_distance_y < distance_y:
+            return direction
+        
+    return list(possible_moves.keys())[0]
+
 if __name__ == "__main__":
     from server import run_server
 
     run_server({"info": info, "start": start, "move": move, "end": end})
 
-    # TODO: Step 2 - Prevent your Battlesnake from colliding with itself
-    # my_body = game_state['you']['body']
-
-    # TODO: Step 3 - Prevent your Battlesnake from colliding with other Battlesnakes
-    # opponents = game_state['board']['snakes']
-
-    # Are there any safe moves left?
-    #safe_moves = []
-    #for move, isSafe in is_move_safe.items():
-     #   if isSafe:
-      #      safe_moves.append(move)
-
-    #if len(safe_moves) == 0:
-     #   print(f"MOVE {game_state['turn']}: No safe moves detected! Moving down")
-     #   return {"move": "down"}
-
-    # Choose a random move from the safe ones
-
-
-    # TODO: Step 4 - Move towards food instead of random, to regain health and survive longer
-    # food = game_state['board']['food']
-
-#print(f"MOVE {game_state['turn']}: {next_move}")
- #   return {"move": next_move}
-
-
-# Start server when `python main.py` is run
 
