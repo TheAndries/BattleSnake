@@ -24,7 +24,7 @@ def info() -> typing.Dict:
         "apiversion": "1",
         "author": "CAsnake",  # TODO: Your Battlesnake Username
         "color": "#0000FF",  # TODO: Choose color
-        "head": "#FFFF00",  # TODO: Choose head
+        "head": "default",  # TODO: Choose head
         "tail": "default",  # TODO: Choose tail
     }
 
@@ -39,7 +39,7 @@ def end(game_state: typing.Dict):
 # See https://docs.battlesnake.com/api/example-move for available data
 def move(game_state: typing.Dict) -> typing.Dict:
     my_head = game_state['you']['body'][0]  # Coordinates of your head. grabs first row of body
-    my_body = game_state['you']['body'][1, :] # grabs head + all of body
+    my_body = game_state['you']['body'][1:] # grabs head + all of body
     board_height = game_state['board']['height']
     board_width = game_state['board']['width']
     snakes = game_state['board']['snakes']
