@@ -14,18 +14,15 @@ import random
 import typing
 from scipy import spatial
 
-# info is called when you create your Battlesnake on play.battlesnake.com
-# and controls your Battlesnake's appearance
-# TIP: If you open your Battlesnake URL in a browser you should see this data
 def info() -> typing.Dict:
     print("INFO")
 
     return {
         "apiversion": "1",
-        "author": "CAsnake",  # TODO: Your Battlesnake Username
-        "color": "#0000FF",  # TODO: Choose color
-        "head": "default",  # TODO: Choose head
-        "tail": "default",  # TODO: Choose tail
+        "author": "CAsnake",  
+        "color": "#0000FF",  
+        "head": "default",  
+        "tail": "default",  
     }
 
 def start(game_state: typing.Dict):
@@ -34,9 +31,6 @@ def start(game_state: typing.Dict):
 def end(game_state: typing.Dict):
     print("GAME OVER\n")
 
-# move is called on every turn and returns your next move
-# Valid moves are "up", "down", "left", or "right"
-# See https://docs.battlesnake.com/api/example-move for available data
 def move(game_state: typing.Dict) -> typing.Dict:
     my_head = game_state['you']['body'][0]  # Coordinates of your head. grabs first row of body
     my_body = game_state['you']['body'][1:] # grabs head + all of body
@@ -69,8 +63,6 @@ def move(game_state: typing.Dict) -> typing.Dict:
     
     target = get_target_close(foods, my_head)
 
-    #print_all(game_state, my_head, my_body) -- this is not printing
-
     if len(possible_moves) > 0:
         if target is not None:
             move = move_target(possible_moves, my_head, target)
@@ -83,12 +75,6 @@ def move(game_state: typing.Dict) -> typing.Dict:
     
     print(f"{game_state['game']['id']} MOVE {game_state['turn']}: {move} picked from all valid options in {possible_moves}")
     return {"move": move}
-    
-def print_all(game_state, my_head, my_body): # unused code, do we need it?
-    print(f"~~~ Turn: {game_state['turn']}) Game Mode: {game_state['game']['ruleset']['name']} ~~~")
-    print(f"All board game_state this turn: {game_state}")
-    print(f"My battlesnakes head this turn is: {my_head}")
-    print(f"My battlesnakes head this turn is: {my_body}")
 
 def avoid_snake(snakes, possible_moves):
     remove = []

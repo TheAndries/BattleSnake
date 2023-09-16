@@ -1,9 +1,9 @@
 ## What is this class defining? See battlesnake webpage
-
+from typing import List
 from  Point import Point
 
 class Snake:
-    def __init__(self, id, name, health, body, latency, head, length, shout, squad):
+    def __init__(self, id: str, name: str, health: int, body: List[Point], latency: str, head: Point, length: int, shout: str, squad: str):
         self.id = id 
         self.name = name
         self.health = health
@@ -20,16 +20,6 @@ class Snake:
     
     def __repr__(self):
         return self.__str__()
-
-name = 'SnakymcMsnake'
-body = [Point(1,3), Point(2,3), Point(3,3)]
-
-TailPoint = Snake(1,name,3,body,5,6,7,8,9)
-print(TailPoint)
-
-#So we want to prevent the snake from moving into walls. It is a matrix of 11x11.
-#Meaning we should have it determine moves as unsafe if:
-#Head coordinates + move = NewCoordinates [(-1,0:11), (0:11,-1), (12, 0:11), (0:11, 12)]
 
 
 
