@@ -1,9 +1,10 @@
 ## What is this class defining? See battlesnake webpage
 from typing import List
 from  Point import Point
+from Customizations import Customizations
 
 class Snake:
-    def __init__(self, id: str, name: str, health: int, body: List[Point], latency: str, head: Point, length: int, shout: str, squad: str):
+    def __init__(self, id: str, name: str, health: int, body: List[Point], latency: str, head: Point, length: int, shout: str, squad: str, customizations: Customizations):
         self.id = id 
         self.name = name
         self.health = health
@@ -14,6 +15,7 @@ class Snake:
         self.shout = shout 
         self.squad = squad
         self.tail =  body[-1]
+        self.customizations = customizations
 
     def __str__(self) -> str:
         return f'{self.id} {self.name} {self.health} {self.body} {self.latency} {self.head} {self.length} {self.shout} {self.tail}' 
