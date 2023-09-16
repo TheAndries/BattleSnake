@@ -13,6 +13,7 @@
 import random
 import typing
 from scipy import spatial
+from GameState import *
 
 def info() -> typing.Dict:
     print("INFO")
@@ -32,29 +33,30 @@ def end(game_state: typing.Dict):
     print("GAME OVER\n")
 
 def move(game_state: typing.Dict) -> typing.Dict:
-    my_head = game_state['you']['body'][0]  # Coordinates of your head. grabs first row of body
-    my_body = game_state['you']['body'][1:] # grabs head + all of body
-    board_height = game_state['board']['height']
-    board_width = game_state['board']['width']
-    snakes = game_state['board']['snakes']
-    foods = game_state['board']['food']
-        
+    my_state = parse_game_state(game_state)
+    my_head = my_state.you.head
+    my_body = my_state.you.body
+    board_width = my_state.board.width
+    board_height = my_state.board.height
+    snakes = my_state.board.snakes
+    foods = my_state.board.food
+    
     possible_moves = { 
         "up": {
-            "x": my_head["x"],
-            "y": my_head["y"] + 1,
+            "x": my_head.x,
+            "y": my_head.y + 1,
         }, 
         "down": { 
-            "x": my_head["x"],
-            "y": my_head["y"] - 1,
+            "x": my_head.x,
+            "y": my_head.y - 1,
         }, 
         "left": { 
-            "x": my_head["x"] - 1,
-            "y": my_head["y"]
+            "x": my_head.x - 1,
+            "y": my_head.y
         }, 
         "right": {
-            "x": my_head["x"] + 1,
-            "y": my_head["y"]
+            "x": my_head.x + 1,
+            "y": my_head.y
         }
     }
     possible_moves = avoid_my_body(my_body, possible_moves)
@@ -106,8 +108,8 @@ def avoid_walls(board_width, board_height, possible_moves):
     remove = []
 
     for direction, location in possible_moves.items():
-        x_out_range = (location["x"] < 0 or location["x"] == board_width)
-        y_out_range = (location["y"] < 0 or location["y"] == board_height)
+        x_out_range = (location.x < 0 or location.x == board_width)
+        y_out_range = (location.y < 0 or location.y == board_height)
 
         if x_out_range or y_out_range:
             remove.append(direction)
@@ -124,21 +126,21 @@ def get_target_close(foods, my_head):
         return None
     
     for food in foods:
-        coordinates.append( (food["x"], food["y"]) )
+        coordinates.append( (food.x, food.y) )
 
     tree = spatial.KDTree(coordinates)
 
-    results = tree.query([(my_head["x"], my_head["y"])])[1]
+    results = tree.query([(my_head.x, my_head.y)])[1]
 
     return foods[results[0]] #gives us closest food 
 
 def move_target(possible_moves, my_head, target):
-    distance_x = abs(my_head["x"] - target["x"]) #absolute because we want a positive
-    distance_y = abs(my_head["y"] - target["y"])
+    distance_x = abs(my_head.x - target.x) #absolute because we want a positive
+    distance_y = abs(my_head.y - target.y)
 
     for direction, location in possible_moves.items():
-        new_distance_x = abs( location["x"] - target["x"])
-        new_distance_y = abs( location["y"] - target["y"])
+        new_distance_x = abs( location.x - target.x)
+        new_distance_y = abs( location.y - target.y)
 
         if new_distance_x < distance_x or new_distance_y < distance_y:
             return direction
