@@ -1,5 +1,5 @@
 ## Give summary after a game 
-from Ruleset import Ruleset
+from .Ruleset import Ruleset
 
 class Game:
     def __init__(self, id: str, ruleset: Ruleset, map: str, timeout: int, source: str ):

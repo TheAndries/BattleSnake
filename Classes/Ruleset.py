@@ -1,4 +1,4 @@
-from Settings import Settings
+from .Settings import Settings
 
 class Ruleset:
     def __init__(self, name: str, version: str, settings: Settings):

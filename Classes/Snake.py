@@ -1,7 +1,7 @@
 ## What is this class defining? See battlesnake webpage
 from typing import List
-from  Point import Point
-from Customizations import Customizations
+from .Point import Point
+from .Customizations import Customizations
 
 class Snake:
     def __init__(self, id: str, name: str, health: int, body: List[Point], latency: str, head: Point, length: int, shout: str, squad: str, customizations: Customizations):

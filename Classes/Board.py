@@ -1,7 +1,7 @@
 ## What is this class defining? 
 ## Matrix of the board 
-from Snake import Snake
-from  Point import Point
+from .Snake import Snake
+from .Point import Point
 from typing import List
 
 

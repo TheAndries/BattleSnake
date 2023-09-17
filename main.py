@@ -12,8 +12,12 @@
 
 import random
 import typing
-from scipy import spatial
-from GameState import *
+from typing import List
+from scipy import spatial 
+from Classes.Point import Point
+from Classes.Snake import Snake
+from Classes.GameState import parse_game_state
+
 
 def info() -> typing.Dict:
     print("INFO")
@@ -35,91 +39,67 @@ def end(game_state: typing.Dict):
 def move(game_state: typing.Dict) -> typing.Dict:
     my_state = parse_game_state(game_state)
     my_head = my_state.you.head
-    my_body = my_state.you.body
     board_width = my_state.board.width
     board_height = my_state.board.height
     snakes = my_state.board.snakes
     foods = my_state.board.food
     
-    possible_moves = { 
-        "up": {
-            "x": my_head.x,
-            "y": my_head.y + 1,
-        }, 
-        "down": { 
-            "x": my_head.x,
-            "y": my_head.y - 1,
-        }, 
-        "left": { 
-            "x": my_head.x - 1,
-            "y": my_head.y
-        }, 
-        "right": {
-            "x": my_head.x + 1,
-            "y": my_head.y
-        }
-    }
-    possible_moves = avoid_my_body(my_body, possible_moves)
+    possible_moves = my_head.get_neighbours()
     possible_moves = avoid_walls(board_width, board_height, possible_moves)
     possible_moves = avoid_snake(snakes, possible_moves)
     
     target = get_target_close(foods, my_head)
-
+   
     if len(possible_moves) > 0:
         if target is not None:
-            move = move_target(possible_moves, my_head, target)
+            move_point = move_target(possible_moves, my_head, target)
+            if(move_point is not None):
+                move = my_head.get_direction(move_point)
+            else:
+                move_point = random.choice(possible_moves)
+                move = my_head.get_direction(move_point)
+
         else:
-            possible_moves = list(possible_moves.keys())
-            move = random.choice(possible_moves)
+            move_point = random.choice(possible_moves)
+            move = my_head.get_direction(move_point)
+
     else:  
         move = "up"
         print('We are going to lose!!')
     
-    print(f"{game_state['game']['id']} MOVE {game_state['turn']}: {move} picked from all valid options in {possible_moves}")
+    print(f"{my_state.game.id} MOVE {game_state['turn']}: {move} picked from all valid options in {possible_moves}")
     return {"move": move}
 
-def avoid_snake(snakes, possible_moves):
-    remove = []
-
+def avoid_snake(snakes: List[Snake], possible_moves: List[Point]) -> List[Point]:
+    to_remove = []
+    
     for snake in snakes:
-        for direction, location in possible_moves.items():
-            if location in snake["body"]:
-                remove.append(direction)
+        for location in possible_moves:
+            if location in snake.body:
+                to_remove.append(location)
 
-    remove = set(remove)            #removes duplicates
-    for direction in remove:
-        del possible_moves[direction]
-
-    return possible_moves
-
-def avoid_my_body(my_body, possible_moves):
-    remove = []
-
-    for direction, location in possible_moves.items(): 
-        if location in my_body:
-            remove.append(direction)
-
-    for direction in remove:
-        del possible_moves[direction]
+    for location in to_remove:
+        possible_moves.remove(location)
 
     return possible_moves
 
-def avoid_walls(board_width, board_height, possible_moves):
-    remove = []
 
-    for direction, location in possible_moves.items():
+def avoid_walls(board_width: int, board_height: int, possible_moves: List[Point]) -> List[Point]:
+    to_remove = [] 
+
+    for location in possible_moves:
         x_out_range = (location.x < 0 or location.x == board_width)
         y_out_range = (location.y < 0 or location.y == board_height)
 
         if x_out_range or y_out_range:
-            remove.append(direction)
-    
-    for direction in remove:
-        del possible_moves[direction]
+            to_remove.append(location)
+
+    for location in to_remove:
+        possible_moves.remove(location)
 
     return possible_moves
 
-def get_target_close(foods, my_head):
+def get_target_close(foods: List[Point], my_head: Point) -> Point | None:
     coordinates = []
 
     if len(foods) == 0:
@@ -134,18 +114,18 @@ def get_target_close(foods, my_head):
 
     return foods[results[0]] #gives us closest food 
 
-def move_target(possible_moves, my_head, target):
+def move_target(possible_moves: List[Point], my_head: Point, target: Point) -> Point | None :
     distance_x = abs(my_head.x - target.x) #absolute because we want a positive
     distance_y = abs(my_head.y - target.y)
 
-    for direction, location in possible_moves.items():
+    for location in possible_moves:
         new_distance_x = abs( location.x - target.x)
         new_distance_y = abs( location.y - target.y)
 
         if new_distance_x < distance_x or new_distance_y < distance_y:
-            return direction
+            return location
         
-    return list(possible_moves.keys())[0]
+    return None
 
 if __name__ == "__main__":
     from server import run_server

@@ -1,11 +1,11 @@
 from typing import Dict
-from Point import Point
-from Game import Game
-from Board import Board
-from Snake import Snake
-from Settings import Settings
-from Ruleset import Ruleset
-from Customizations import Customizations
+from .Point import Point
+from .Game import Game
+from .Board import Board
+from .Snake import Snake
+from .Settings import Settings
+from .Ruleset import Ruleset
+from .Customizations import Customizations
 
 class GameState:
     def __init__(self, game: Game, turn: int, board: Board, you: Snake):
